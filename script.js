@@ -240,6 +240,15 @@
       return { src: b.getAttribute("data-cert"), title: b.getAttribute("data-cert-title") || "" };
     });
 
+    // 这些链接本身就是 <a href="图片">，JS 未加载时直接打开图片；
+    // 这里让它们只打开灯箱，避免同页跳转。顺手加上新窗口兜底。
+    certBtns.forEach(function (link) {
+      if (link.tagName === "A") {
+        link.setAttribute("target", "_blank");
+        link.setAttribute("rel", "noopener");
+      }
+    });
+
     function show(i) {
       if (!gallery.length) return;
       index = (i + gallery.length) % gallery.length;
@@ -275,8 +284,13 @@
       if (lastFocus && lastFocus.focus) lastFocus.focus();
     }
 
-    certBtns.forEach(function (btn, i) {
-      btn.addEventListener("click", function () { open(i); });
+    certBtns.forEach(function (link, i) {
+      link.addEventListener("click", function (e) {
+        // 允许 Ctrl/⌘ 或中键走浏览器默认行为（新窗口打开图片）
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        e.preventDefault();
+        open(i);
+      });
     });
 
     $$("[data-lb-close]", lb).forEach(function (el) {
