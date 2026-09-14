@@ -162,7 +162,9 @@
   var typed = $("#typed");
   if (typed) {
     var phrases = [
-      "化学工程与工艺 · 本科生",
+      "南京大学 化学学院 · 硕士研究生",
+      "本科毕业于厦门大学 化学化工学院",
+      "化学工程与工艺 → 化学",
       "热界面材料 / 石墨烯复合材料",
       "紫外光催化与反应条件优化",
       "细菌表面展示 · 草甘膦检测",
@@ -221,6 +223,87 @@
       document.body.removeChild(ta);
       done();
     } catch (e) { /* 静默失败 */ }
+  }
+
+  /* ---------- 8. 获奖证书查看器（灯箱） ---------- */
+  var lb = $("#lightbox");
+  if (lb) {
+    var lbImage = $("#lbImage");
+    var lbTitle = $("#lbTitle");
+    var lbCount = $("#lbCount");
+    var lastFocus = null;
+    var index = 0;
+
+    // 所有带证书的按钮，按页面顺序编号，可左右切换
+    var certBtns = $$("[data-cert]");
+    var gallery = certBtns.map(function (b) {
+      return { src: b.getAttribute("data-cert"), title: b.getAttribute("data-cert-title") || "" };
+    });
+
+    function show(i) {
+      if (!gallery.length) return;
+      index = (i + gallery.length) % gallery.length;
+      var item = gallery[index];
+      lbImage.setAttribute("src", item.src);
+      lbImage.setAttribute("alt", item.title + " 获奖证书");
+      if (lbTitle) lbTitle.textContent = item.title;
+      if (lbCount) lbCount.textContent = (index + 1) + " / " + gallery.length;
+      var multi = gallery.length > 1;
+      var prev = $("#lbPrev"), next = $("#lbNext");
+      if (prev) prev.hidden = !multi;
+      if (next) next.hidden = !multi;
+    }
+
+    function open(i) {
+      lastFocus = document.activeElement;
+      show(i);
+      lb.hidden = false;
+      // 触发过渡
+      window.requestAnimationFrame(function () { lb.classList.add("is-open"); });
+      document.body.classList.add("lb-locked");
+      var close = $("#lbClose");
+      if (close) close.focus();
+    }
+
+    function close() {
+      lb.classList.remove("is-open");
+      document.body.classList.remove("lb-locked");
+      window.setTimeout(function () {
+        lb.hidden = true;
+        lbImage.setAttribute("src", "");
+      }, 240);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    certBtns.forEach(function (btn, i) {
+      btn.addEventListener("click", function () { open(i); });
+    });
+
+    $$("[data-lb-close]", lb).forEach(function (el) {
+      el.addEventListener("click", close);
+    });
+    var prevBtn = $("#lbPrev"), nextBtn = $("#lbNext");
+    if (prevBtn) prevBtn.addEventListener("click", function () { show(index - 1); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { show(index + 1); });
+
+    document.addEventListener("keydown", function (e) {
+      if (lb.hidden) return;
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowLeft") show(index - 1);
+      else if (e.key === "ArrowRight") show(index + 1);
+    });
+
+    // 触摸左右滑动切换
+    var startX = null;
+    lb.addEventListener("touchstart", function (e) {
+      startX = e.touches.length === 1 ? e.touches[0].clientX : null;
+    }, { passive: true });
+    lb.addEventListener("touchend", function (e) {
+      if (startX === null || !e.changedTouches.length) return;
+      var dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 50) show(index + (dx < 0 ? 1 : -1));
+      startX = null;
+    }, { passive: true });
   }
 
 })();
