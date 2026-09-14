@@ -1,6 +1,6 @@
 /* =========================================================
    赖帆 · 个人主页  certs.css
-   获奖证书查看器（灯箱）、荣誉条目布局、田径荣誉卡片
+   获奖证书查看器（灯箱）、荣誉条目与证书链接样式
    在主样式表之后引入，负责覆盖与补充
    ========================================================= */
 
@@ -37,11 +37,14 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.5;
   white-space: nowrap;
   cursor: pointer;
   transition: color 0.22s var(--ease), border-color 0.22s var(--ease),
     background 0.22s var(--ease), transform 0.22s var(--ease);
 }
+a.cert-btn { text-decoration: none; }
+a.cert-btn:visited { color: var(--text-2); }
 .cert-btn svg {
   width: 16px;
   height: 16px;
